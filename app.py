@@ -1,10 +1,10 @@
 import requests
 import xml.etree.ElementTree as ET
 import time
-from flask import Flask
+from flask import Flask, render_template
 app = Flask(__name__)
 
-def api(station):
+def ns_api(station):
     url = 'https://webservices.ns.nl/ns-api-avt?station='+station
     username = 'ninodejong@gmail.com'
     password = 'zAXbd8mqx6bgNtNKVasUxd_Pn8bKKb3SQVS-wOY365uGYhVk4t1F7w'
@@ -12,31 +12,26 @@ def api(station):
 
     response = requests.get(url, auth=auth_values)
     schedule = ET.fromstring(response.content)
-
     return schedule
 
-@app.route('/')
-def nstijden():
-    retar = []
-    station = 'Utrecht Centraal'
-    # tut https://likegeeks.com/python-gui-examples-tkinter-tutorial/#Create-your-first-GUI-application     https://www.tutorialspoint.com/python/tk_text.htm
-    schedule = api(station)
-    # print("Vertrek tijden: "+station)
-    for train in schedule:
-        carrier = train.find('Vervoerder').text
-        trainType = train.find('TreinSoort').text
-        dep_time = train.find('VertrekTijd').text.split('T')
-        timed = str(dep_time[0] + " " + dep_time[1]).split('+')
-        to = train.find('EindBestemming').text
-        rideID = train.find('RitNummer').text
-        platform = train.find('VertrekSpoor').text
+@app.route('/<train_station>')
+def vertrektijden(train_station):
+    station = train_station
+    schedule = ns_api(train_station)
+    row = []
+    for departure in schedule:
+        carrier = departure.find('Vervoerder').text
+        trainType = departure.find('TreinSoort').text
+        dep_time = departure.find('VertrekTijd').text.split('T')
+        timed = str(dep_time[0]+ " "+dep_time[1]).split('+')
+        depart = str(time.strftime("%H:%M",time.strptime(str(timed[0]),'%Y-%m-%d %H:%M:%S')))
+        to = departure.find('EindBestemming').text
+        rideID = departure.find('RitNummer').text
+        platform = departure.find('VertrekSpoor').text
+        platformChange = departure.find('VertrekSpoor').attrib
 
-        platformChange = train.find('VertrekSpoor').attrib
-        departure = str(time.strftime("%H:%M %d %b, %Y",
-                                      time.strptime(str(timed[0]), '%Y-%m-%d %H:%M:%S')))
-        retar.append("<li>" + carrier + " " + trainType + " naar: " + to +
-                     " vertrekt om: " + departure + " vannaf spoor: " + platform+"</li>")
-    return(str(retar))
+        row.extend([[depart,to,carrier+' '+trainType,platform]])
+    return render_template('app.html', **locals())
 
 if __name__ == '__main__':
     app.run()
