@@ -14,6 +14,15 @@ def ns_api(station):
     schedule = ET.fromstring(response.content)
     return schedule
 
+# schedule = ns_api(',bnlnlknl')
+# if schedule.find('error') != -1:
+#     print('continue')
+# else:
+#     print('error')
+#     print(schedule)
+@app.route('/')
+def index():
+    return render_template('index.html')
 @app.route('/<train_station>')
 def vertrektijden(train_station):
     station = train_station
@@ -34,4 +43,4 @@ def vertrektijden(train_station):
     return render_template('app.html', **locals())
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='127.0.0.1')
