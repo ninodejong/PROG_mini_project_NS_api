@@ -3,6 +3,8 @@ import xml.etree.ElementTree as ET
 import time
 import tkinter
 from tkinter import *
+from tkinter.messagebox import showinfo
+from PIL import ImageTk, Image
 
 
 def ns_api(station):
@@ -35,28 +37,47 @@ def vertrektijden(train_station):
     return (row)
 
 
-def guiwindow():
-    window = tkinter.Tk()
-    window.geometry("700x800+300+300")
-    window.title("NS TIJDEN V1N Groep 3")
-    window.configure(background="yellow")
-    img = PhotoImage(file="C:\HU\PRIVATE\logo.png")
-    label = Label(image=img)
-    label.image = img
-    label.pack()
-
-    window.listbox = Listbox(window)
-    window.listbox.configure(font=("Comic Sans MS", 12))
-    window.listbox['width'] = 50
-    window.listbox['height'] = 50
-    window.listbox.pack()
-
-    for item in vertrektijden("utrecht centraal"):
-        window.listbox.insert(END, item)
-
-    window.mainloop()
+def clicked():
+    user_input = str(e1.get())
+    try:
+        guiwindow(user_input)
+    except AttributeError:
+        errorpopup(user_input)
+    return(user_input)
 
 
-guiwindow()
+def errorpopup(str):
+    bericht = "{} is geen stations naam".format(str)
+    showinfo(title='popup', message=bericht)
+
+
+def guiwindow(str):
+    main = tkinter.Tk()
+    main.geometry("700x800+200+300")
+    main.title("Vetrek tijden voor station {}" .format(str))
+    main.configure(background="yellow")
+    # main.panel = Label(
+    #     main, text="Vertrektijden voor station {}" .format(str))
+    # main.label.pack()
+    main.listbox = Listbox(main)
+    main.listbox.configure(font=("Comic Sans MS", 12))
+    main.listbox['width'] = 50
+    main.listbox['height'] = 50
+    main.listbox.pack()
+    for item in vertrektijden(str):
+        main.listbox.insert(END, item)
+    main.mainloop()
+
+
+entrywin = tkinter.Tk()
+entrywin.geometry("300x100")
+entrywin.title("Voer stations naam in:")
+entrywin.configure(background="yellow")
+e1 = Entry(master=entrywin, )
+e1.pack(padx=10, pady=10)
+button = Button(master=entrywin, text='Druk hier', command=clicked)
+button.pack(pady=10)
+entrywin.mainloop()
+
 
 # vertrektijden("gouda")
