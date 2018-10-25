@@ -4,10 +4,10 @@ import time
 import tkinter
 from tkinter import *
 from tkinter.messagebox import showinfo
-from PIL import ImageTk, Image
 
 
 def ns_api(station):
+    """Voert authenticatie waardes in en returned de xml waarde voor de gegeven parameter(stations naam)."""
     url = 'https://webservices.ns.nl/ns-api-avt?station='+station
     username = 'finn.fonteijn@student.hu.nl'
     password = '0RS_2RtKZsWypx6GIqxneGyzsGOKRO8opRBLN5koe2sR7bjeYNk-XQ'
@@ -19,7 +19,10 @@ def ns_api(station):
 
 
 def vertrektijden(train_station):
-    station = train_station
+    """
+    Creëert per vertrekkende trein een lijst met relevante informatie zoals:
+    vertrektijd,eindbestemming,vervoerder,sprinter/intercity en plaatst deze lijsten in een omvangende lijst.
+    """
     schedule = ns_api(train_station)
     row = []
     for departure in schedule:
@@ -38,27 +41,29 @@ def vertrektijden(train_station):
 
 
 def clicked():
+    """
+    Haalt de invoer van de gebruiker op uit het entry veld, en probeert met deze string een lijst te generen,
+    Als dit niet lukt door een verkeerde getypte stationsnaam (de Attribute error) word functie errorpopup() uitgevoerd.
+    """
     user_input = str(e1.get())
     try:
         guiwindow(user_input)
     except AttributeError:
         errorpopup(user_input)
-    return(user_input)
 
 
 def errorpopup(str):
+    """Opent een popout venster met de invoer, een boodschap dat dat station niet valide is. """
     bericht = "{} is geen stations naam".format(str)
     showinfo(title='popup', message=bericht)
 
 
 def guiwindow(str):
+    """Functie die een 2de tkinter window opent,met een  lijstbox waarin de vertrektijden in worden getoont."""
     main = tkinter.Tk()
     main.geometry("700x800+200+300")
     main.title("Vetrek tijden voor station {}" .format(str))
     main.configure(background="yellow")
-    # main.panel = Label(
-    #     main, text="Vertrektijden voor station {}" .format(str))
-    # main.label.pack()
     main.listbox = Listbox(main)
     main.listbox.configure(font=("Comic Sans MS", 12))
     main.listbox['width'] = 50
@@ -69,13 +74,14 @@ def guiwindow(str):
     main.mainloop()
 
 
+"""Input window met clicked() functie"""
 entrywin = tkinter.Tk()
 entrywin.geometry("300x100")
 entrywin.title("Voer stations naam in:")
 entrywin.configure(background="yellow")
 e1 = Entry(master=entrywin, )
 e1.pack(padx=10, pady=10)
-button = Button(master=entrywin, text='Druk hier', command=clicked)
+button = Button(master=entrywin, text='Haal vetrektijden op', command=clicked)
 button.pack(pady=10)
 entrywin.mainloop()
 
